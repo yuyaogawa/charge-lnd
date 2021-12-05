@@ -68,6 +68,17 @@ def strategy_ignore(channel, policy, **kwargs):
 def strategy_static(channel, policy, **kwargs):
     return (policy.getint('base_fee_msat'), policy.getint('fee_ppm'))
 
+@strategy(name = 'fee-proportional')
+def strategy_fee_proportional(channel, policy, **kwargs):
+    fee_ppm_proportion = policy.getfloat('fee_ppm_proportion')
+    lnd = kwargs['lnd']
+    if channel.chan_id in lnd.feereport:
+        (current_base_fee_msat, current_fee_ppm) = lnd.feereport[channel.chan_id]
+    ppm = int(current_fee_ppm * fee_ppm_proportion)
+    # clamp to 0..inf
+    ppm = max(ppm,0)
+    return (policy.getint('base_fee_msat'), ppm)
+
 @strategy(name = 'proportional')
 def strategy_proportional(channel, policy, **kwargs):
     if policy.getint('min_fee_ppm_delta',-1) < 0:
