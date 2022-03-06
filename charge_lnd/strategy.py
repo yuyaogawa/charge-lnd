@@ -74,7 +74,8 @@ def strategy_fee_proportional(channel, policy, **kwargs):
     lnd = kwargs['lnd']
     if channel.chan_id in lnd.feereport:
         (current_base_fee_msat, current_fee_ppm) = lnd.feereport[channel.chan_id]
-    ppm = int(current_fee_ppm * fee_ppm_proportion)
+    new_ppm = int(current_fee_ppm * fee_ppm_proportion)
+    ppm = new_ppm if new_ppm >= 1 else 1 # Min is set to 1 ppm. True if fruit == 'Apple' else False
     # clamp to 0..inf
     ppm = max(ppm,0)
     return (policy.getint('base_fee_msat'), ppm)
