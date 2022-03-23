@@ -49,6 +49,17 @@ class StrategyDelegate:
     def effective_max_htlc_msat(self, channel):
         result = self.policy.getint('max_htlc_msat')
         ratio = self.policy.getfloat('max_htlc_msat_ratio')
+
+        # https://github.com/BhaagBoseDK/charge-lnd/blob/master/charge_lnd/strategy.py#L53
+        if result == -1:
+        # Special case for setting max-htlc = local balance
+            result = max(2169420,int((channel.local_balance-channel.remote_constraints.chan_reserve_sat)/10000)*10000000)
+            # Channel Cap is in Sat divide by 1000
+            channel_cap=result/1000
+        else:
+            channel_cap = channel.capacity
+            channel_cap = channel_cap - channel.remote_constraints.chan_reserve_sat
+
         if ratio:
             ratio = max(0,min(1,ratio))
             channel_cap = channel.capacity
