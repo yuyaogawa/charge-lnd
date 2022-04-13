@@ -88,10 +88,10 @@ def strategy_fee_proportional(channel, policy, **kwargs):
     new_ppm = int(current_fee_ppm * fee_ppm_proportion)
     if new_ppm < 10:
         ppm = 10
-    elif new_ppm < 1000:
+    elif new_ppm < 500:
         ppm = new_ppm
     else:
-        ppm = 1000
+        ppm = 500
     # clamp to 0..inf
     ppm = max(ppm,0)
     return (policy.getint('base_fee_msat'), ppm)
